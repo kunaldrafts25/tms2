@@ -155,8 +155,8 @@ except ImportError as e:
 
 # Import fallback systems for Streamlit Cloud deployment
 try:
-    from src.utils.video_fallback import get_available_sample_videos, get_synthetic_video_generator, create_fallback_video_info, download_kaggle_datasets_info
-    from src.utils.model_fallback import ModelFallbackManager, SimulatedTrafficData
+    from src.utils.video_fallback import get_synthetic_video_generator
+    from src.utils.model_fallback import ModelFallbackManager
     FALLBACK_SYSTEMS_AVAILABLE = True
     print("SUCCESS: Fallback systems imported successfully")
 except ImportError as fallback_error:
@@ -7506,7 +7506,7 @@ def main():
     )
 
     # Initialize video_source_type with default value
-    video_source_type = "Sample Video"  # Default fallback
+    video_source_type = "Webcam"  # Default fallback
     video_source = None
 
     if dashboard_mode == "Real-time Live Feed":
@@ -7514,7 +7514,7 @@ def main():
         st.sidebar.header("📹 Video Source")
         video_source_type = st.sidebar.selectbox(
             "Select Video Source",
-            ["Webcam", "Video File", "Sample Video"]
+            ["Webcam", "Video File"]
         )
 
         # Video source configuration
@@ -7531,54 +7531,6 @@ def main():
                 st.sidebar.success(f"✅ Video uploaded: {uploaded_file.name}")
             else:
                 video_source = None
-        elif video_source_type == "Sample Video":
-            # Enhanced video dataset with fallback system
-            st.sidebar.markdown("**📹 Video Dataset Options**")
-
-            # Use fallback system to get available videos
-            if FALLBACK_SYSTEMS_AVAILABLE:
-                available_videos = get_available_sample_videos()
-
-                if available_videos:
-                    # Check if we have real video files or synthetic options
-                    real_videos = [v for v in available_videos if v['type'] == 'file']
-                    synthetic_videos = [v for v in available_videos if v['type'] == 'synthetic']
-
-                    if real_videos:
-                        st.sidebar.success(f"📁 Found {len(real_videos)} sample videos")
-                        video_options = [f"{v['name']} ({v['path']})" for v in real_videos]
-                        selected_video = st.sidebar.selectbox("Select Video Source", video_options)
-                        # Extract path from selection
-                        video_source = selected_video.split(" (")[-1].rstrip(")")
-                    else:
-                        st.sidebar.info("🎭 Using synthetic traffic simulation")
-                        video_options = [f"{v['name']} - {v['description']}" for v in synthetic_videos]
-                        selected_video = st.sidebar.selectbox("Select Simulation", video_options)
-                        # Extract synthetic scenario
-                        video_source = synthetic_videos[video_options.index(selected_video)]['path']
-
-                        # Show Kaggle download instructions
-                        with st.sidebar.expander("📊 Download Real Traffic Videos"):
-                            kaggle_datasets = download_kaggle_datasets_info()
-                            for dataset in kaggle_datasets:
-                                st.code(dataset['command'])
-                                st.caption(f"Extract to: {dataset['extract_to']}")
-                else:
-                    st.sidebar.error("❌ No video sources available")
-                    video_source = "synthetic_urban"  # Default fallback
-            else:
-                # Legacy fallback without fallback systems
-                st.sidebar.warning("⚠️ No sample videos found. Please download datasets:")
-                st.sidebar.code("""
-# Download Kaggle datasets:
-kaggle datasets download chicicecream/720p-road-and-traffic-video-for-object-detection
-kaggle datasets download aryashah2k/highway-traffic-videos-dataset
-
-# Extract to:
-# data/kaggle/720p-road-and-traffic-video/
-# data/kaggle/highway-traffic-videos/
-                """)
-                video_source = "demo_mode"
 
     # Stream control buttons
     col1, col2 = st.sidebar.columns(2)

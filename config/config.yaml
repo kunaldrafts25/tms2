@@ -1,0 +1,138 @@
+# Traffic Management System (TMS2) Configuration
+# Main configuration file for all system components
+
+# Application settings
+app:
+  name: "Traffic Management System 2.0"
+  version: "2.0.0"
+  debug: false
+  environment: "development"
+  
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_path: "logs/tms2.log"
+  max_file_size: "10MB"
+  backup_count: 5
+  console_output: true
+
+# Model configurations
+models:
+  # YOLO vehicle detection model
+  yolo:
+    weights_path: "models/yolov8n.pt"
+    confidence_threshold: 0.5
+    nms_threshold: 0.4
+    input_size: [640, 640]
+    classes: [2, 3, 5, 7]  # car, motorcycle, bus, truck
+    
+  # LSTM traffic prediction model
+  lstm:
+    model_path: "models/lstm_traffic_predictor.h5"
+    sequence_length: 10
+    features: ["traffic_density", "avg_speed", "time_of_day"]
+    epochs: 50
+    batch_size: 32
+    learning_rate: 0.001
+    prediction_horizon: 5
+    update_frequency: 100
+    buffer_size: 1000
+    
+  # Reinforcement Learning agent
+  rl:
+    model_path: "models/rl_agent.pkl"
+    agent_type: "DoubleDQN"
+    state_size: 12
+    action_size: 4
+    learning_rate: 0.001
+    epsilon: 0.1
+    epsilon_decay: 0.995
+    epsilon_min: 0.01
+    memory_size: 10000
+    batch_size: 32
+    target_update_frequency: 100
+
+# Data processing settings
+data:
+  # Video processing
+  video:
+    fps: 30
+    resolution: [1920, 1080]
+    buffer_size: 100
+    
+  # Camera settings
+  camera:
+    default_index: 0
+    timeout: 5
+    retry_attempts: 3
+    
+  # Data storage
+  storage:
+    database_path: "data/traffic_data.db"
+    backup_interval: 3600  # seconds
+    retention_days: 30
+
+# Traffic signal control
+traffic_signals:
+  # Default intersection settings
+  default:
+    phases:
+      - name: "North-South Green"
+        duration: 30
+        green_lights: ["north", "south"]
+        red_lights: ["east", "west"]
+      - name: "East-West Green"
+        duration: 25
+        green_lights: ["east", "west"]
+        red_lights: ["north", "south"]
+    yellow_duration: 3
+    all_red_duration: 2
+    
+  # Intersection-specific settings
+  intersections:
+    main:
+      location: [0, 0]
+      priority: 1
+      adaptive_timing: true
+      
+# Dashboard settings
+dashboard:
+  host: "localhost"
+  port: 8501
+  title: "TMS2 Smart Traffic Dashboard"
+  refresh_interval: 1000  # milliseconds
+  max_video_fps: 15
+  
+# Performance settings
+performance:
+  max_threads: 4
+  gpu_acceleration: true
+  memory_limit: "2GB"
+  processing_timeout: 30
+
+# Network settings
+network:
+  api_timeout: 10
+  retry_attempts: 3
+  connection_pool_size: 10
+
+# Security settings
+security:
+  enable_authentication: false
+  session_timeout: 3600
+  max_login_attempts: 3
+
+# Feature flags
+features:
+  multi_camera: true
+  real_time_prediction: true
+  adaptive_signals: true
+  environmental_monitoring: true
+  
+# Development settings
+development:
+  mock_data: false
+  simulation_mode: false
+  debug_visualization: true
+  profiling_enabled: false
